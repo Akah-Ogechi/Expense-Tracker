@@ -1,0 +1,146 @@
+body {
+    background-color: #eee9ff;
+    color: #292733;
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+input {
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid #d5cef0;
+    background-color: #ffffff;
+    color: #292733;
+    border-radius: 8px;
+}
+
+button {
+    padding: 9px 14px;
+    margin: 5px;
+    cursor: pointer;
+    background-color: #6c63ff;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+button:hover {
+    opacity: 0.85;
+}
+
+body > p {
+    text-align: center;
+    margin-top: 0;
+}
+
+#expenseList {
+    margin-top: 20px;
+}
+
+.expenseCard {
+    background-color: #ffffff;
+    color: #292733;
+    padding: 16px;
+    margin: 10px 0;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.expenseInfo {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    font-size: 16px;
+}
+
+.expenseActions {
+    display: flex;
+    gap: 8px;
+}
+
+.expenseActions button {
+    margin: 0;
+    padding: 7px 12px;
+}
+
+#totalExpense {
+    background-color: #6c63ff;
+    color: #ffffff;
+    padding: 18px;
+    margin-top: 25px;
+    border-radius: 10px;
+    font-size: 22px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+}
+
+#expenseForm {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: flex-end;
+    gap: 15px;
+    margin-top: 25px;
+    margin-bottom: 30px;
+}
+
+#expenseForm div {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+#expenseForm label {
+    margin-bottom: 6px;
+    font-weight: bold;
+}
+
+#expenseForm input {
+    margin: 0;
+    width: auto;
+}
+
+#expenseForm button {
+    margin: 0;
+    height: 40px;
+}
+#expenseName {
+    width: 220px;
+}
+
+#expenseAmount {
+    width: 120px;
+}
+
+#editForm {
+    background-color: #ffffff;
+    padding: 20px;
+    margin-top: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+#editForm h3 {
+    margin-top: 0;
+}
+
+#editForm input {
+    margin: 5px 5px 5px 0;
+}
+
+#editForm button {
+    margin-left: 0;
+}
