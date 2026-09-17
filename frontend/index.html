@@ -6,255 +6,392 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Expense Tracker</title>
 </head>
+
 <body>
+
     <h1>Expense Tracker</h1>
 
     <p>Welcome to your expense tracker</p>
 
-<div id="expenseForm">
-    <div>
-        <label for="expenseName">Expense name:</label>
-        <input type="text" id="expenseName">
+    <div id="expenseForm">
+
+        <div>
+            <label for="expenseName">Expense name:</label>
+            <input type="text" id="expenseName">
+        </div>
+
+        <div>
+            <label for="expenseAmount">Amount:</label>
+            <input type="number" id="expenseAmount">
+        </div>
+
+        <button onclick="addExpense()">Add Expense</button>
+
     </div>
 
-    <div>
-        <label for="expenseAmount">Amount:</label>
-        <input type="number" id="expenseAmount">
-    </div>
-
-    <button onclick="addExpense()">Add Expense</button>
-</div>
-    
     <h2>My Expenses</h2>
 
-<div id="expenseList"></div>
+    <div id="expenseList"></div>
 
-<div id="editForm" style="display: none;">
-    <h3>Edit Expense</h3>
+    <div id="editForm" style="display: none;">
 
-    <input type="text" id="editName">
-    <input type="number" id="editAmount">
+        <h3>Edit Expense</h3>
 
-    <button onclick="saveEdit()">Save Changes</button>
-    <button onclick="cancelEdit()">Cancel</button>
-</div>
+        <input type="text" id="editName">
+        <input type="number" id="editAmount">
 
-<div id="totalExpense"></div>
-    <script>
-let editExpenseId = null;
-function formatMoney(amount) {
-    return `₦${Number(amount).toLocaleString("en-NG")}`;
-}
-async function addExpense() {
-    const name = document.getElementById("expenseName").value;
-    const amount = document.getElementById("expenseAmount").value;
-    if (name.trim() === "") {
-    alert("Please enter an expense name.");
-    return;
-}
-    if (amount === "") {
-    alert("Please enter an amount.");
-    return;
-}
-    if (Number(amount) <= 0) {
-    alert("Amount must be greater than 0.");
-    return;
-}
-    try{
-    const response = await fetch("https://expense-tracker-xmfx.onrender.com/expenses", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            name: name,
-            amount: Number(amount)
-        })
-    });
-    if (!response.ok) {
-    throw new Error("Request failed");
-}
+        <button onclick="saveEdit()">Save Changes</button>
+        <button onclick="cancelEdit()">Cancel</button>
 
-    const data = await response.json();
-
-    console.log(data);
-    alert("Expense added successfully!");
-
-    viewExpenses();
-    getTotal();
-
-    document.getElementById("expenseName").value = "";
-    document.getElementById("expenseAmount").value = "";
-} catch (error) {
-    console.log(error);
-    alert("something went wrong.");
-}
-}
-
-async function viewExpenses() {
-    try {
-    const response = await fetch("https://expense-tracker-xmfx.onrender.com/expenses")
-    if (!response.ok) {
-    throw new Error("Request failed");
-}
-
-    const data = await response.json();
-
-    const expenseList = document.getElementById("expenseList");
-
-    expenseList.innerHTML = "";
-
-    for (let index = 0; index < data.expenses.length; index++) {
-        const expense = data.expenses[index];
-
-        expenseList.innerHTML += `
-    <div class="expenseCard">
-        <div class="expenseInfo">
-            <span>${expense.id}. ${expense.name}</span>
-            <span>${formatMoney(expense.amount)}</span>
-        </div>
-
-        <div class="expenseActions">
-            <button onclick="editExpense(${expense.id})">Edit</button>
-            <button onclick="deleteExpense(${expense.id})">Delete</button>
-        </div>
     </div>
-`;
-    }
-    } catch (error) {
-        console.log(error);
-        alert("something went wrong.");
-}
-}
 
-async function deleteExpense(expenseId) {
+    <div id="totalExpense"></div>
 
-    try{
-    const response = await fetch(
-        `https://expense-tracker-xmfx.onrender.com/expenses/${expenseId}`,
-        {
-            method: "DELETE"
-        }
-    );
-    if (!response.ok) {
-    throw new Error("Request failed");
-}
 
-    const data = await response.json();
+    <script>
 
-    console.log(data);
+        let editExpenseId = null;
 
-    viewExpenses();
-    getTotal();
-} catch (error) {
-    console.log(error);
-    alert("something went wrong.");
-}
-}
 
-async function editExpense(expenseId) {
-    editExpenseId = expenseId;
-
-    document.getElementById("editForm").style.display = "block";
-
-    try {
-        const response = await fetch(
-            `https://expense-tracker-xmfx.onrender.com/expenses`
-        );
-
-        if (!response.ok) {
-            throw new Error("Request failed");
+        function formatMoney(amount) {
+            return `₦${Number(amount).toLocaleString("en-NG")}`;
         }
 
-        const data = await response.json();
 
-        const expense = data.expenses.find(
-            expense => expense.id === expenseId
-        );
+        // ADD EXPENSE
+        async function addExpense() {
 
-        if (!expense) {
-            alert("Expense not found.");
-            return;
-        }
+            const name = document.getElementById("expenseName").value;
+            const amount = document.getElementById("expenseAmount").value;
 
-        document.getElementById("editName").value = expense.name;
-        document.getElementById("editAmount").value = expense.amount;
-
-    } catch (error) {
-        console.log(error);
-        alert("something went wrong.");
-    }
-}
-async function saveEdit() {
-    const name = document.getElementById("editName").value;
-    const amount = document.getElementById("editAmount").value;
-
-    if (name.trim() === "") {
-        alert("Please enter an expense name.");
-        return;
-    }
-
-    if (amount === "" || Number(amount) <= 0 || isNaN(Number(amount))) {
-        alert("Please enter a valid amount.");
-        return;
-    }
-
-    try {
-        const response = await fetch(
-            `https://expense-tracker-xmfx.onrender.com/expenses/${editExpenseId}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name: name,
-                    amount: Number(amount)
-                })
+            if (name.trim() === "") {
+                alert("Please enter an expense name.");
+                return;
             }
-        );
 
-        if (!response.ok) {
-            throw new Error("Request failed");
+            if (amount === "") {
+                alert("Please enter an amount.");
+                return;
+            }
+
+            if (Number(amount) <= 0) {
+                alert("Amount must be greater than 0.");
+                return;
+            }
+
+            try {
+
+                const response = await fetch(
+                    "https://expense-tracker-2-sr3f.onrender.com/expenses",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            name: name,
+                            amount: Number(amount)
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const data = await response.json();
+
+                console.log(data);
+
+                alert("Expense added successfully!");
+
+                viewExpenses();
+                getTotal();
+
+                document.getElementById("expenseName").value = "";
+                document.getElementById("expenseAmount").value = "";
+
+            } catch (error) {
+
+                console.log(error);
+                alert("Something went wrong.");
+
+            }
         }
 
-        const data = await response.json();
 
-        console.log(data);
+        // VIEW EXPENSES
+        async function viewExpenses() {
 
-        document.getElementById("editForm").style.display = "none";
+            try {
 
+                const response = await fetch(
+                    "https://expense-tracker-2-sr3f.onrender.com/expenses"
+                );
+
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const data = await response.json();
+
+                const expenseList =
+                    document.getElementById("expenseList");
+
+                expenseList.innerHTML = "";
+
+                for (
+                    let index = 0;
+                    index < data.expenses.length;
+                    index++
+                ) {
+
+                    const expense = data.expenses[index];
+
+                    expenseList.innerHTML += `
+                        <div class="expenseCard">
+
+                            <div class="expenseInfo">
+
+                                <span>
+                                    ${expense.id}. ${expense.name}
+                                </span>
+
+                                <span>
+                                    ${formatMoney(expense.amount)}
+                                </span>
+
+                            </div>
+
+                            <div class="expenseActions">
+
+                                <button
+                                    onclick="editExpense(${expense.id})">
+                                    Edit
+                                </button>
+
+                                <button
+                                    onclick="deleteExpense(${expense.id})">
+                                    Delete
+                                </button>
+
+                            </div>
+
+                        </div>
+                    `;
+                }
+
+            } catch (error) {
+
+                console.log(error);
+                alert("Something went wrong.");
+
+            }
+        }
+
+
+        // DELETE EXPENSE
+        async function deleteExpense(expenseId) {
+
+            try {
+
+                const response = await fetch(
+                    `https://expense-tracker-2-sr3f.onrender.com/expenses/${expenseId}`,
+                    {
+                        method: "DELETE"
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const data = await response.json();
+
+                console.log(data);
+
+                viewExpenses();
+                getTotal();
+
+            } catch (error) {
+
+                console.log(error);
+                alert("Something went wrong.");
+
+            }
+        }
+
+
+        // GET EXPENSE FOR EDITING
+        async function editExpense(expenseId) {
+
+            editExpenseId = expenseId;
+
+            document.getElementById("editForm").style.display = "block";
+
+            try {
+
+                const response = await fetch(
+                    "https://expense-tracker-2-sr3f.onrender.com/expenses"
+                );
+
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const data = await response.json();
+
+                const expense = data.expenses.find(
+                    expense => expense.id === expenseId
+                );
+
+                if (!expense) {
+
+                    alert("Expense not found.");
+                    return;
+
+                }
+
+                document.getElementById("editName").value =
+                    expense.name;
+
+                document.getElementById("editAmount").value =
+                    expense.amount;
+
+            } catch (error) {
+
+                console.log(error);
+                alert("Something went wrong.");
+
+            }
+        }
+
+
+        // SAVE EDIT
+        async function saveEdit() {
+
+            const name =
+                document.getElementById("editName").value;
+
+            const amount =
+                document.getElementById("editAmount").value;
+
+
+            if (name.trim() === "") {
+
+                alert("Please enter an expense name.");
+                return;
+
+            }
+
+
+            if (
+                amount === "" ||
+                Number(amount) <= 0 ||
+                isNaN(Number(amount))
+            ) {
+
+                alert("Please enter a valid amount.");
+                return;
+
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `https://expense-tracker-2-sr3f.onrender.com/expenses/${editExpenseId}`,
+                    {
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            name: name,
+                            amount: Number(amount)
+                        })
+                    }
+                );
+
+
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+
+                const data = await response.json();
+
+                console.log(data);
+
+
+                document.getElementById("editForm").style.display =
+                    "none";
+
+
+                viewExpenses();
+                getTotal();
+
+
+            } catch (error) {
+
+                console.log(error);
+                alert("Something went wrong.");
+
+            }
+        }
+
+
+        // CANCEL EDIT
+        function cancelEdit() {
+
+            document.getElementById("editForm").style.display =
+                "none";
+
+        }
+
+
+        // GET TOTAL
+        async function getTotal() {
+
+            try {
+
+                const response = await fetch(
+                    "https://expense-tracker-2-sr3f.onrender.com/expenses/total"
+                );
+
+                if (!response.ok) {
+                    throw new Error("Request failed");
+                }
+
+                const data = await response.json();
+
+                const totalExpense =
+                    document.getElementById("totalExpense");
+
+                totalExpense.textContent =
+                    `Total Expense: ${formatMoney(data.total_expenses)}`;
+
+            } catch (error) {
+
+                console.log(error);
+
+                const totalExpense =
+                    document.getElementById("totalExpense");
+
+                totalExpense.textContent =
+                    "Something went wrong.";
+
+            }
+        }
+
+
+        // LOAD DATA WHEN PAGE OPENS
         viewExpenses();
         getTotal();
 
-    } catch (error) {
-        console.log(error);
-        alert("something went wrong.");
-    }
-}
-function cancelEdit() {
-    document.getElementById("editForm").style.display = "none";
-}
+    </script>
 
-async function getTotal() {
-    try {
-    const response = await fetch("https://expense-tracker-xmfx.onrender.com/expenses/total");
-    if (!response.ok) {
-    throw new Error("Request failed");
-}
-
-    const data = await response.json();
-
-    const totalExpense = document.getElementById("totalExpense");
-
-totalExpense.textContent = `Total expenses: ${formatMoney(data.total_expenses)}`;
-} catch (error) {
-    console.log(error);
-    alert("something went wrong.");
-}
-}
-viewExpenses();
-getTotal();
-</script>
 </body>
 </html>
