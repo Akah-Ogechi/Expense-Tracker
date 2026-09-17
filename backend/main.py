@@ -1,16 +1,23 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from database import Base, engine, SessionLocal, Expense as ExpenseModel
-#bring fastapi into my program
+import os
+
+# Bring FastAPI into my program
 app = FastAPI()
 
+# Create database tables
 Base.metadata.create_all(bind=engine)
+
 
 def get_db():
     db = SessionLocal()
     return db
 
+
+# Allow frontend requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,14 +25,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# Data we expect when adding or editing an expense
 class Expense(BaseModel):
     name: str
     amount: int
-@app.get("/")
-#when  a GET request is sent to /,run the func underneath
-def home():
-    return {"message": "Expense Tracker API"}
 
+
+# ADD EXPENSE
 @app.post("/expenses")
 def add_expense(expense: Expense):
     db = get_db()
@@ -38,7 +45,6 @@ def add_expense(expense: Expense):
     db.add(new_expense)
     db.commit()
     db.refresh(new_expense)
-
     db.close()
 
     return {
@@ -50,6 +56,8 @@ def add_expense(expense: Expense):
         }
     }
 
+
+# VIEW EXPENSES
 @app.get("/expenses")
 def view_expenses():
     db = get_db()
@@ -69,6 +77,8 @@ def view_expenses():
         ]
     }
 
+
+# DELETE EXPENSE
 @app.delete("/expenses/{expense_id}")
 def delete_expense(expense_id: int):
     db = get_db()
@@ -78,23 +88,27 @@ def delete_expense(expense_id: int):
     ).first()
 
     if expense:
+        deleted_expense = {
+            "id": expense.id,
+            "name": expense.name,
+            "amount": expense.amount
+        }
+
         db.delete(expense)
         db.commit()
         db.close()
 
         return {
             "message": "Expense deleted",
-            "deleted": {
-                "id": expense.id,
-                "name": expense.name,
-                "amount": expense.amount
-            }
+            "deleted": deleted_expense
         }
 
     db.close()
 
     return {"message": "Invalid expense number"}
 
+
+# EDIT EXPENSE
 @app.put("/expenses/{expense_id}")
 def edit_expense(expense_id: int, expense: Expense):
     db = get_db()
@@ -123,6 +137,9 @@ def edit_expense(expense_id: int, expense: Expense):
     db.close()
 
     return {"message": "Invalid expense number"}
+
+
+# GET TOTAL
 @app.get("/expenses/total")
 def total_expenses():
     db = get_db()
@@ -137,3 +154,19 @@ def total_expenses():
     db.close()
 
     return {"total_expenses": total}
+
+
+# SERVE FRONTEND
+frontend_path = os.path.join(
+    os.path.dirname(__file__),
+    "../frontend"
+)
+
+app.mount(
+    "/",
+    StaticFiles(
+        directory=frontend_path,
+        html=True
+    ),
+    name="frontend"
+)
